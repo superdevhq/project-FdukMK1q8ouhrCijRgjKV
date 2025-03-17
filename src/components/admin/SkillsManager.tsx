@@ -2,199 +2,377 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skill } from "@/types/skill";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Trash2, Edit, Plus } from "lucide-react";
 
 const SkillsManager = () => {
-  const [skills, setSkills] = useState<Skill[]>(() => {
-    const savedSkills = localStorage.getItem('portfolio-skills');
-    return savedSkills ? JSON.parse(savedSkills) : [
-      { id: 1, name: "React", level: 90, category: "Frontend" },
-      { id: 2, name: "TypeScript", level: 85, category: "Languages" },
-      { id: 3, name: "Node.js", level: 80, category: "Backend" },
-      { id: 4, name: "CSS/Tailwind", level: 90, category: "Frontend" },
-      { id: 5, name: "UI/UX Design", level: 75, category: "Design" }
-    ];
-  });
-  
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentSkill, setCurrentSkill] = useState<Skill | null>(null);
-  const [newSkill, setNewSkill] = useState<Omit<Skill, 'id'>>({
+  const [formData, setFormData] = useState<Partial<Skill>>({
     name: "",
     level: 50,
     category: ""
   });
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Save skills to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('portfolio-skills', JSON.stringify(skills));
-  }, [skills]);
+    fetchSkills();
+  }, []);
 
-  const handleAddSkill = () => {
-    if (!newSkill.name || !newSkill.category) {
-      toast.error("Please fill in all fields");
-      return;
+  const fetchSkills = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .order('category', { ascending: true });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setSkills(data);
+      }
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load skills. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    const id = skills.length > 0 ? Math.max(...skills.map(skill => skill.id)) + 1 : 1;
-    
-    setSkills([...skills, { id, ...newSkill }]);
-    setNewSkill({ name: "", level: 50, category: "" });
-    setIsAddDialogOpen(false);
-    toast.success("Skill added successfully");
   };
 
-  const handleEditSkill = () => {
-    if (!currentSkill || !currentSkill.name || !currentSkill.category) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setSkills(skills.map(skill => 
-      skill.id === currentSkill.id ? currentSkill : skill
-    ));
-    setIsEditDialogOpen(false);
-    toast.success("Skill updated successfully");
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDeleteSkill = () => {
+  const handleSliderChange = (value: number[]) => {
+    setFormData(prev => ({ ...prev, level: value[0] }));
+  };
+
+  const handleAddSkill = async () => {
+    try {
+      // Validate form data
+      if (!formData.name || !formData.category) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('skills')
+        .insert([{
+          name: formData.name,
+          level: formData.level || 50,
+          category: formData.category
+        }])
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        toast({
+          title: "Success",
+          description: "Skill added successfully!",
+        });
+        
+        // Reset form and close dialog
+        setFormData({
+          name: "",
+          level: 50,
+          category: ""
+        });
+        setIsAddDialogOpen(false);
+        
+        // Refresh skills
+        fetchSkills();
+      }
+    } catch (error) {
+      console.error('Error adding skill:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add skill. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditSkill = async () => {
     if (!currentSkill) return;
-    
-    setSkills(skills.filter(skill => skill.id !== currentSkill.id));
-    setIsDeleteDialogOpen(false);
-    toast.success("Skill deleted successfully");
+
+    try {
+      // Validate form data
+      if (!formData.name || !formData.category) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('skills')
+        .update({
+          name: formData.name,
+          level: formData.level || 50,
+          category: formData.category
+        })
+        .eq('id', currentSkill.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Skill updated successfully!",
+      });
+      
+      // Reset form and close dialog
+      setFormData({
+        name: "",
+        level: 50,
+        category: ""
+      });
+      setCurrentSkill(null);
+      setIsEditDialogOpen(false);
+      
+      // Refresh skills
+      fetchSkills();
+    } catch (error) {
+      console.error('Error updating skill:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update skill. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteSkill = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this skill?")) return;
+
+    try {
+      const { error } = await supabase
+        .from('skills')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Skill deleted successfully!",
+      });
+      
+      // Refresh skills
+      fetchSkills();
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete skill. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const openEditDialog = (skill: Skill) => {
     setCurrentSkill(skill);
+    setFormData({
+      name: skill.name,
+      level: skill.level,
+      category: skill.category
+    });
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (skill: Skill) => {
-    setCurrentSkill(skill);
-    setIsDeleteDialogOpen(true);
-  };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Your Skills</h3>
-        <Button 
-          onClick={() => setIsAddDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Skill
+        <h2 className="text-2xl font-bold">Skills</h2>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Skill
         </Button>
       </div>
 
-      {skills.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          No skills added yet. Click "Add Skill" to get started.
-        </div>
-      ) : (
-        <div className="border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Level</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {skills.map((skill) => (
-                <TableRow key={skill.id}>
-                  <TableCell className="font-medium">{skill.name}</TableCell>
-                  <TableCell>{skill.category}</TableCell>
-                  <TableCell>{skill.level}%</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => openEditDialog(skill)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => openDeleteDialog(skill)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">All Skills</TabsTrigger>
+          {Array.from(new Set(skills.map(skill => skill.category))).map(category => (
+            <TabsTrigger key={category} value={category}>
+              {category}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="all">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {loading ? (
+              Array(4).fill(0).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-6 bg-muted rounded w-3/4"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-4 bg-muted rounded mb-2"></div>
+                    <div className="h-2 bg-muted rounded"></div>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="h-10 bg-muted rounded w-full"></div>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : skills.length > 0 ? (
+              skills.map(skill => (
+                <Card key={skill.id}>
+                  <CardHeader>
+                    <CardTitle className="flex justify-between items-start">
+                      <span>{skill.name}</span>
+                      <span className="text-sm px-2 py-1 bg-secondary rounded-full">
+                        {skill.category}
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-muted-foreground">Proficiency</span>
+                      <span className="text-sm font-medium">{skill.level}%</span>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${skill.level}%` }}
+                      ></div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(skill)}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteSkill(skill.id)}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-muted-foreground">No skills found. Add your first skill!</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {Array.from(new Set(skills.map(skill => skill.category))).map(category => (
+          <TabsContent key={category} value={category}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {skills
+                .filter(skill => skill.category === category)
+                .map(skill => (
+                  <Card key={skill.id}>
+                    <CardHeader>
+                      <CardTitle>{skill.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm text-muted-foreground">Proficiency</span>
+                        <span className="text-sm font-medium">{skill.level}%</span>
+                      </div>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary"
+                          style={{ width: `${skill.level}%` }}
+                        ></div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(skill)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteSkill(skill.id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
 
       {/* Add Skill Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Skill</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Skill Name</Label>
-              <Input 
-                id="name" 
-                value={newSkill.name}
-                onChange={(e) => setNewSkill({...newSkill, name: e.target.value})}
-                placeholder="e.g. React, JavaScript, UI Design"
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="e.g., React, TypeScript, UI Design"
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="category">Category</Label>
-              <Input 
-                id="category" 
-                value={newSkill.category}
-                onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
-                placeholder="e.g. Frontend, Backend, Design"
+              <Input
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                placeholder="e.g., Frontend, Backend, Design"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="level">Proficiency Level: {newSkill.level}%</Label>
-              <Input 
-                id="level" 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={newSkill.level}
-                onChange={(e) => setNewSkill({...newSkill, level: parseInt(e.target.value)})}
+              <div className="flex justify-between">
+                <Label htmlFor="level">Proficiency Level: {formData.level}%</Label>
+              </div>
+              <Slider
+                id="level"
+                defaultValue={[formData.level || 50]}
+                max={100}
+                step={1}
+                onValueChange={handleSliderChange}
               />
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleAddSkill}>Add Skill</Button>
           </DialogFooter>
         </DialogContent>
@@ -202,65 +380,49 @@ const SkillsManager = () => {
 
       {/* Edit Skill Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Skill</DialogTitle>
           </DialogHeader>
-          {currentSkill && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Skill Name</Label>
-                <Input 
-                  id="edit-name" 
-                  value={currentSkill.name}
-                  onChange={(e) => setCurrentSkill({...currentSkill, name: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-category">Category</Label>
-                <Input 
-                  id="edit-category" 
-                  value={currentSkill.category}
-                  onChange={(e) => setCurrentSkill({...currentSkill, category: e.target.value})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-level">Proficiency Level: {currentSkill.level}%</Label>
-                <Input 
-                  id="edit-level" 
-                  type="range" 
-                  min="0" 
-                  max="100" 
-                  value={currentSkill.level}
-                  onChange={(e) => setCurrentSkill({...currentSkill, level: parseInt(e.target.value)})}
-                />
-              </div>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Skill Name</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="e.g., React, TypeScript, UI Design"
+              />
             </div>
-          )}
+            <div className="grid gap-2">
+              <Label htmlFor="edit-category">Category</Label>
+              <Input
+                id="edit-category"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                placeholder="e.g., Frontend, Backend, Design"
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex justify-between">
+                <Label htmlFor="edit-level">Proficiency Level: {formData.level}%</Label>
+              </div>
+              <Slider
+                id="edit-level"
+                value={[formData.level || 50]}
+                max={100}
+                step={1}
+                onValueChange={handleSliderChange}
+              />
+            </div>
+          </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleEditSkill}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <p>
-            Are you sure you want to delete the skill "{currentSkill?.name}"? 
-            This action cannot be undone.
-          </p>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={handleDeleteSkill}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -6,88 +6,83 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ChevronRight } from "lucide-react";
 import BlogPostModal from "./BlogPostModal";
-import { BlogPost } from "@/types/blog";
+import { BlogPost, BlogPostClient, toClientBlogPost } from "@/types/blog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [selectedPost, setSelectedPost] = useState<BlogPostClient | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPostClient[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   
   useEffect(() => {
-    // Load blog posts from localStorage
-    const savedPosts = localStorage.getItem('portfolio-blog-posts');
-    const loadedPosts = savedPosts 
-      ? JSON.parse(savedPosts) 
-      : [
-          {
-            id: 1,
-            title: "Getting Started with React Hooks",
-            excerpt: "Learn how to use React Hooks to simplify your functional components and manage state effectively.",
-            date: "May 15, 2023",
-            readTime: "5 min read",
-            category: "React",
-            image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?q=80&w=2070&auto=format&fit=crop",
-            content: "This is a sample blog post about React Hooks. In this article, we'll explore how to use useState, useEffect, and other hooks to build powerful React applications."
-          },
-          {
-            id: 2,
-            title: "Mastering CSS Grid Layout",
-            excerpt: "A comprehensive guide to CSS Grid Layout and how it can transform your web design approach.",
-            date: "April 22, 2023",
-            readTime: "8 min read",
-            category: "CSS",
-            image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=2070&auto=format&fit=crop",
-            content: "CSS Grid Layout is a powerful tool for creating complex web layouts. In this article, we'll dive deep into grid templates, areas, and responsive design techniques."
-          },
-          {
-            id: 3,
-            title: "TypeScript Best Practices",
-            excerpt: "Discover the best practices for writing clean, maintainable TypeScript code in your projects.",
-            date: "March 10, 2023",
-            readTime: "6 min read",
-            category: "TypeScript",
-            image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop",
-            content: "TypeScript has become an essential tool for modern web development. This article covers type definitions, interfaces, and patterns to make your TypeScript code more robust."
-          },
-          {
-            id: 4,
-            title: "Building Accessible Web Applications",
-            excerpt: "Why accessibility matters and how to implement it in your web applications for all users.",
-            date: "February 5, 2023",
-            readTime: "7 min read",
-            category: "Accessibility",
-            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2069&auto=format&fit=crop",
-            content: "Web accessibility is crucial for ensuring your applications can be used by everyone. Learn about ARIA attributes, keyboard navigation, and testing tools for accessibility."
-          }
-        ];
-    
-    setBlogPosts(loadedPosts);
-    
-    // Extract unique categories
-    const uniqueCategories = Array.from(new Set(loadedPosts.map(post => post.category)));
-    setCategories(uniqueCategories);
+    fetchBlogPosts();
   }, []);
+
+  const fetchBlogPosts = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Convert from DB format to client format
+        const clientPosts = data.map(post => toClientBlogPost(post));
+        setBlogPosts(clientPosts);
+        
+        // Extract unique categories
+        const uniqueCategories = Array.from(new Set(data.map(post => post.category)));
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load blog posts. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredPosts = selectedCategory 
     ? blogPosts.filter(post => post.category === selectedCategory)
     : blogPosts;
 
-  const handleReadMore = (post: BlogPost) => {
-    // Ensure we have the latest version of the post from localStorage
-    const savedPosts = localStorage.getItem('portfolio-blog-posts');
-    if (savedPosts) {
-      const allPosts = JSON.parse(savedPosts);
-      const updatedPost = allPosts.find((p: BlogPost) => p.id === post.id);
-      if (updatedPost) {
-        setSelectedPost(updatedPost);
+  const handleReadMore = async (post: BlogPostClient) => {
+    try {
+      // Fetch the latest version of the post from Supabase
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('id', post.id)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setSelectedPost(toClientBlogPost(data));
       } else {
         setSelectedPost(post);
       }
-    } else {
-      setSelectedPost(post);
+    } catch (error) {
+      console.error('Error fetching blog post details:', error);
+      setSelectedPost(post); // Fallback to the post we already have
     }
+    
     setIsModalOpen(true);
   };
 
@@ -100,10 +95,7 @@ const Blog = () => {
   // Refresh blog posts when modal is closed to ensure we have the latest data
   useEffect(() => {
     if (!isModalOpen) {
-      const savedPosts = localStorage.getItem('portfolio-blog-posts');
-      if (savedPosts) {
-        setBlogPosts(JSON.parse(savedPosts));
-      }
+      fetchBlogPosts();
     }
   }, [isModalOpen]);
 
@@ -138,53 +130,80 @@ const Blog = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredPosts.map((post, index) => (
-          <motion.div
-            key={post.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <Card className="h-full flex flex-col overflow-hidden">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={post.image} 
-                  alt={post.title} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                />
-              </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="h-full flex flex-col overflow-hidden">
+              <div className="h-48 bg-muted animate-pulse"></div>
               <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline">{post.category}</Badge>
-                </div>
-                <CardTitle className="line-clamp-2">{post.title}</CardTitle>
+                <div className="w-24 h-6 bg-muted animate-pulse rounded-full mb-2"></div>
+                <div className="w-full h-8 bg-muted animate-pulse rounded"></div>
               </CardHeader>
               <CardContent className="flex-grow">
-                <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                <div className="w-full h-16 bg-muted animate-pulse rounded"></div>
               </CardContent>
               <CardFooter className="flex justify-between border-t pt-4">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="mr-1 h-4 w-4" />
-                  <span>{post.date}</span>
-                  <span className="mx-2">•</span>
-                  <Clock className="mr-1 h-4 w-4" />
-                  <span>{post.readTime}</span>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-primary"
-                  onClick={() => handleReadMore(post)}
-                >
-                  Read more
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
+                <div className="w-32 h-4 bg-muted animate-pulse rounded"></div>
+                <div className="w-24 h-8 bg-muted animate-pulse rounded"></div>
               </CardFooter>
             </Card>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post, index) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card className="h-full flex flex-col overflow-hidden">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src={post.image} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                  </div>
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">{post.category}</Badge>
+                    </div>
+                    <CardTitle className="line-clamp-2">{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                  </CardContent>
+                  <CardFooter className="flex justify-between border-t pt-4">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="mr-1 h-4 w-4" />
+                      <span>{post.date}</span>
+                      <span className="mx-2">•</span>
+                      <Clock className="mr-1 h-4 w-4" />
+                      <span>{post.readTime}</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary"
+                      onClick={() => handleReadMore(post)}
+                    >
+                      Read more
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-2 text-center py-12">
+              <p className="text-muted-foreground">No blog posts found in this category.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <BlogPostModal 
         post={selectedPost} 

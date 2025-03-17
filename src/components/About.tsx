@@ -1,162 +1,221 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skill } from "@/types/skill";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const About = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Load skills from localStorage
-    const savedSkills = localStorage.getItem('portfolio-skills');
-    const loadedSkills = savedSkills 
-      ? JSON.parse(savedSkills) 
-      : [
-          { id: 1, name: "React", level: 90, category: "Frontend" },
-          { id: 2, name: "TypeScript", level: 85, category: "Languages" },
-          { id: 3, name: "Node.js", level: 80, category: "Backend" },
-          { id: 4, name: "CSS/Tailwind", level: 90, category: "Frontend" },
-          { id: 5, name: "UI/UX Design", level: 75, category: "Design" }
-        ];
-    
-    setSkills(loadedSkills);
-    
-    // Extract unique categories
-    const uniqueCategories = Array.from(new Set(loadedSkills.map(skill => skill.category)));
-    setCategories(uniqueCategories);
+    fetchSkills();
   }, []);
 
-  const filteredSkills = selectedCategory 
-    ? skills.filter(skill => skill.category === selectedCategory)
-    : skills;
+  const fetchSkills = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .order('category', { ascending: true });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setSkills(data);
+        
+        // Extract unique categories
+        const uniqueCategories = Array.from(new Set(data.map(skill => skill.category)));
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load skills. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <section className="space-y-8 py-8">
-      <div className="text-center space-y-4">
-        <h2 className="text-3xl md:text-4xl font-bold">About Me</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          I'm a passionate web developer with expertise in modern frontend technologies.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+    <section className="py-16">
+      <div className="container mx-auto px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="text-center mb-12"
         >
-          <h3 className="text-xl font-semibold mb-4">Who I Am</h3>
-          <div className="space-y-4 text-muted-foreground">
-            <p>
-              Hello! I'm a web developer with a passion for creating beautiful, 
-              functional, and user-centered digital experiences. I'm currently 
-              focused on building accessible, responsive web applications.
-            </p>
-            <p>
-              With 5+ years of experience in the field, I've worked on a variety 
-              of projects from small business websites to complex enterprise 
-              applications. I'm always looking to learn new technologies and improve 
-              my skills.
-            </p>
-            <p>
-              When I'm not coding, you can find me hiking, reading, or experimenting 
-              with new recipes in the kitchen.
-            </p>
-          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">About Me</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            I'm a passionate web developer with expertise in modern frontend and backend technologies.
+            I love creating beautiful, responsive, and user-friendly web applications.
+          </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">My Skills</h3>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  selectedCategory === null 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-muted hover:bg-muted/80'
-                }`}
-              >
-                All
-              </button>
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                    selectedCategory === category 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-muted hover:bg-muted/80'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h3 className="text-2xl font-bold mb-4">My Journey</h3>
+            <div className="space-y-4 text-muted-foreground">
+              <p>
+                I started my journey as a web developer 5 years ago, focusing on creating 
+                responsive and accessible web applications. My passion for clean code and 
+                user-centric design has driven me to continuously learn and improve.
+              </p>
+              <p>
+                Throughout my career, I've worked with various technologies and frameworks, 
+                always striving to find the best tools for each specific project. I believe 
+                in writing maintainable code that solves real problems.
+              </p>
+              <p>
+                When I'm not coding, you can find me exploring new technologies, contributing 
+                to open-source projects, or sharing my knowledge through blog posts and community events.
+              </p>
             </div>
-          </div>
+            <div className="mt-6">
+              <Button>Download Resume</Button>
+            </div>
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <h3 className="text-2xl font-bold mb-4">My Skills</h3>
+            
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-6 bg-muted rounded w-1/3 mb-2"></div>
+                    <div className="h-2 bg-muted rounded w-full"></div>
+                  </div>
+                ))}
+              </div>
+            ) : categories.length > 0 ? (
+              <Tabs defaultValue={categories[0]} className="w-full">
+                <TabsList className="mb-4">
+                  {categories.map(category => (
+                    <TabsTrigger key={category} value={category}>
+                      {category}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                
+                {categories.map(category => (
+                  <TabsContent key={category} value={category} className="space-y-4">
+                    {skills
+                      .filter(skill => skill.category === category)
+                      .map((skill, index) => (
+                        <motion.div 
+                          key={skill.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
+                          className="space-y-2"
+                        >
+                          <div className="flex justify-between">
+                            <span className="font-medium">{skill.name}</span>
+                            <span className="text-sm text-muted-foreground">{skill.level}%</span>
+                          </div>
+                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-primary"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${skill.level}%` }}
+                              transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                            ></motion.div>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              <p className="text-muted-foreground">No skills found.</p>
+            )}
+          </motion.div>
+        </div>
 
-          <div className="space-y-4">
-            {filteredSkills.map((skill, index) => (
-              <motion.div
-                key={skill.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <div className="flex justify-between mb-1">
-                  <span className="font-medium">{skill.name}</span>
-                  <span className="text-muted-foreground">{skill.level}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                  <div 
-                    className="bg-primary h-2.5 rounded-full" 
-                    style={{ width: `${skill.level}%` }}
-                  ></div>
-                </div>
-              </motion.div>
-            ))}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="bg-card rounded-lg p-8 border"
+        >
+          <h3 className="text-2xl font-bold mb-4">Education & Experience</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h4 className="text-xl font-semibold mb-4">Education</h4>
+              <ul className="space-y-6">
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Master's in Computer Science</span>
+                    <span className="text-sm text-muted-foreground">2018-2020</span>
+                  </div>
+                  <p className="text-muted-foreground">University of Technology</p>
+                </li>
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Bachelor's in Software Engineering</span>
+                    <span className="text-sm text-muted-foreground">2014-2018</span>
+                  </div>
+                  <p className="text-muted-foreground">State University</p>
+                </li>
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Web Development Bootcamp</span>
+                    <span className="text-sm text-muted-foreground">2013</span>
+                  </div>
+                  <p className="text-muted-foreground">Code Academy</p>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xl font-semibold mb-4">Experience</h4>
+              <ul className="space-y-6">
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Senior Frontend Developer</span>
+                    <span className="text-sm text-muted-foreground">2021-Present</span>
+                  </div>
+                  <p className="text-muted-foreground">Tech Innovations Inc.</p>
+                </li>
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Full Stack Developer</span>
+                    <span className="text-sm text-muted-foreground">2018-2021</span>
+                  </div>
+                  <p className="text-muted-foreground">Digital Solutions Ltd.</p>
+                </li>
+                <li>
+                  <div className="flex justify-between mb-1">
+                    <span className="font-medium">Junior Web Developer</span>
+                    <span className="text-sm text-muted-foreground">2016-2018</span>
+                  </div>
+                  <p className="text-muted-foreground">Creative Web Agency</p>
+                </li>
+              </ul>
+            </div>
           </div>
         </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8"
-      >
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h4 className="text-4xl font-bold text-primary">5+</h4>
-              <p className="text-muted-foreground mt-2">Years of Experience</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h4 className="text-4xl font-bold text-primary">50+</h4>
-              <p className="text-muted-foreground mt-2">Projects Completed</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h4 className="text-4xl font-bold text-primary">20+</h4>
-              <p className="text-muted-foreground mt-2">Happy Clients</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </section>
   );
 };

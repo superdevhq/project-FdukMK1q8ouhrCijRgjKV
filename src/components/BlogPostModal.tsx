@@ -2,10 +2,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock } from "lucide-react";
-import { BlogPost } from "@/types/blog";
+import { BlogPostClient } from "@/types/blog";
 
 interface BlogPostModalProps {
-  post: BlogPost | null;
+  post: BlogPostClient | null;
   isOpen: boolean;
   onClose: () => void;
 }
