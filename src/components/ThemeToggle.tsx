@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/ThemeProvider"
 
-export function ThemeToggle() {
+const ThemeToggle = () => {
   const { theme, setTheme } = useTheme()
 
   return (
@@ -19,3 +19,5 @@ export function ThemeToggle() {
     </Button>
   )
 }
+
+export default ThemeToggle
