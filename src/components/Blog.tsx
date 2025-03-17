@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,48 +12,60 @@ const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   
-  const blogPosts: BlogPost[] = [
-    {
-      id: 1,
-      title: "Getting Started with React Hooks",
-      excerpt: "Learn how to use React Hooks to simplify your functional components and manage state effectively.",
-      date: "May 15, 2023",
-      readTime: "5 min read",
-      category: "React",
-      image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Mastering CSS Grid Layout",
-      excerpt: "A comprehensive guide to CSS Grid Layout and how it can transform your web design approach.",
-      date: "April 22, 2023",
-      readTime: "8 min read",
-      category: "CSS",
-      image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      title: "TypeScript Best Practices",
-      excerpt: "Discover the best practices for writing clean, maintainable TypeScript code in your projects.",
-      date: "March 10, 2023",
-      readTime: "6 min read",
-      category: "TypeScript",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Building Accessible Web Applications",
-      excerpt: "Why accessibility matters and how to implement it in your web applications for all users.",
-      date: "February 5, 2023",
-      readTime: "7 min read",
-      category: "Accessibility",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2069&auto=format&fit=crop"
-    }
-  ];
+  useEffect(() => {
+    // Load blog posts from localStorage
+    const savedPosts = localStorage.getItem('portfolio-blog-posts');
+    const loadedPosts = savedPosts 
+      ? JSON.parse(savedPosts) 
+      : [
+          {
+            id: 1,
+            title: "Getting Started with React Hooks",
+            excerpt: "Learn how to use React Hooks to simplify your functional components and manage state effectively.",
+            date: "May 15, 2023",
+            readTime: "5 min read",
+            category: "React",
+            image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?q=80&w=2070&auto=format&fit=crop"
+          },
+          {
+            id: 2,
+            title: "Mastering CSS Grid Layout",
+            excerpt: "A comprehensive guide to CSS Grid Layout and how it can transform your web design approach.",
+            date: "April 22, 2023",
+            readTime: "8 min read",
+            category: "CSS",
+            image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=2070&auto=format&fit=crop"
+          },
+          {
+            id: 3,
+            title: "TypeScript Best Practices",
+            excerpt: "Discover the best practices for writing clean, maintainable TypeScript code in your projects.",
+            date: "March 10, 2023",
+            readTime: "6 min read",
+            category: "TypeScript",
+            image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop"
+          },
+          {
+            id: 4,
+            title: "Building Accessible Web Applications",
+            excerpt: "Why accessibility matters and how to implement it in your web applications for all users.",
+            date: "February 5, 2023",
+            readTime: "7 min read",
+            category: "Accessibility",
+            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2069&auto=format&fit=crop"
+          }
+        ];
+    
+    setBlogPosts(loadedPosts);
+    
+    // Extract unique categories
+    const uniqueCategories = Array.from(new Set(loadedPosts.map(post => post.category)));
+    setCategories(uniqueCategories);
+  }, []);
 
-  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
-  
   const filteredPosts = selectedCategory 
     ? blogPosts.filter(post => post.category === selectedCategory)
     : blogPosts;
