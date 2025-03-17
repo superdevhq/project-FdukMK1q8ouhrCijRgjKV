@@ -1,31 +1,35 @@
 
-import { Routes, Route } from 'react-router-dom'
-import { Navbar } from './components/Navbar'
-import { Footer } from './components/Footer'
-import { About } from './components/About'
-import { Projects } from './components/Projects'
-import { Blog } from './components/Blog'
-import { Contact } from './components/Contact'
-import AdminDashboard from './pages/AdminDashboard'
-import NotFound from './pages/NotFound'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import About from "./components/About";
+import Projects from "./components/Projects";
+import Blog from "./components/Blog";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
+import { Toaster } from "./components/ui/sonner";
+import "./App.css";
 
 function App() {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Navbar />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
-  )
+    <Router>
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<Navigate to="/about" replace />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+        <Toaster />
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
