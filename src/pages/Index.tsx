@@ -25,7 +25,7 @@ const Index = () => {
       <div className="bg-gradient-to-r from-primary/20 to-secondary/20 py-12 mb-8">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-            Welcome to My Portfolio
+            Itay Schechner
           </h1>
           <p className="text-xl text-center mt-4 max-w-2xl mx-auto text-muted-foreground">
             Explore my projects, blog posts, and get in touch to discuss how we can work together.
