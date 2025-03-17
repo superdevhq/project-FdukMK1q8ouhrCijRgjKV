@@ -45,10 +45,27 @@ const About = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
+        {/* Hero section with name */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="mb-16"
+        >
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">
+            Hey, I'm Itay
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl">
+            I'm a passionate web developer with expertise in modern frontend and backend technologies.
+            I love creating beautiful, responsive, and user-friendly web applications.
+          </p>
+        </motion.div>
+
+        {/* About section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">About Me</h2>
