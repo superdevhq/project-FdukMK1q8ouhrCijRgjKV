@@ -22,6 +22,17 @@ const Index = () => {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar activeSection={activeSection} setActiveSection={setActiveSection} />
       
+      <div className="bg-gradient-to-r from-primary/20 to-secondary/20 py-12 mb-8">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+            Welcome to My Portfolio
+          </h1>
+          <p className="text-xl text-center mt-4 max-w-2xl mx-auto text-muted-foreground">
+            Explore my projects, blog posts, and get in touch to discuss how we can work together.
+          </p>
+        </div>
+      </div>
+
       <main className="container mx-auto px-4 py-8 md:py-16 flex-grow">
         <AnimatePresence mode="wait">
           {activeSection === "about" && (
@@ -29,19 +40,19 @@ const Index = () => {
               <About />
             </motion.div>
           )}
-          
+
           {activeSection === "projects" && (
             <motion.div key="projects" {...pageTransition}>
               <Projects />
             </motion.div>
           )}
-          
+
           {activeSection === "blog" && (
             <motion.div key="blog" {...pageTransition}>
               <Blog />
             </motion.div>
           )}
-          
+
           {activeSection === "contact" && (
             <motion.div key="contact" {...pageTransition}>
               <Contact />
@@ -49,7 +60,7 @@ const Index = () => {
           )}
         </AnimatePresence>
       </main>
-      
+
       <Footer />
     </div>
   );
