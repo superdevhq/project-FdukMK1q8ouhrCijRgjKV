@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "next-themes";
 import Navbar from "@/components/Navbar";
 import About from "@/components/About";
 import Projects from "@/components/Projects";
@@ -11,7 +10,6 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("about");
-  const { theme } = useTheme();
 
   const pageTransition = {
     initial: { opacity: 0, y: 20 },
