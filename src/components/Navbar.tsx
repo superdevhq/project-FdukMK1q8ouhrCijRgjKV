@@ -39,6 +39,7 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
+          {/* Logo area - removed name/portfolio text */}
           <div className="flex-shrink-0">
             <a
               href="#"
@@ -48,7 +49,7 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
                 setActiveSection("about");
               }}
             >
-              <span className="text-primary">Portfolio</span>
+              {/* Removed "Portfolio" text */}
             </a>
           </div>
 
