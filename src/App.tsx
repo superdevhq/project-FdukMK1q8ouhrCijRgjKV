@@ -13,6 +13,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background text-foreground">
+        {/* Navbar serves as the header */}
         <Navbar />
         
         <main className="container mx-auto px-4 py-8">
