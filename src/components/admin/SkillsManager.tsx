@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,6 @@ import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skill } from "@/types/skill";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -220,114 +218,63 @@ const SkillsManager = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Skills</TabsTrigger>
-          {Array.from(new Set(skills.map(skill => skill.category))).map(category => (
-            <TabsTrigger key={category} value={category}>
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="all">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {loading ? (
-              Array(4).fill(0).map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-muted rounded mb-2"></div>
-                    <div className="h-2 bg-muted rounded"></div>
-                  </CardContent>
-                  <CardFooter>
-                    <div className="h-10 bg-muted rounded w-full"></div>
-                  </CardFooter>
-                </Card>
-              ))
-            ) : skills.length > 0 ? (
-              skills.map(skill => (
-                <Card key={skill.id}>
-                  <CardHeader>
-                    <CardTitle className="flex justify-between items-start">
-                      <span>{skill.name}</span>
-                      <span className="text-sm px-2 py-1 bg-secondary rounded-full">
-                        {skill.category}
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-muted-foreground">Proficiency</span>
-                      <span className="text-sm font-medium">{skill.level}%</span>
-                    </div>
-                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary"
-                        style={{ width: `${skill.level}%` }}
-                      ></div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(skill)}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDeleteSkill(skill.id)}>
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-2 text-center py-12">
-                <p className="text-muted-foreground">No skills found. Add your first skill!</p>
-              </div>
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading ? (
+          Array(4).fill(0).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-muted rounded mb-2"></div>
+                <div className="h-2 bg-muted rounded"></div>
+              </CardContent>
+              <CardFooter>
+                <div className="h-10 bg-muted rounded w-full"></div>
+              </CardFooter>
+            </Card>
+          ))
+        ) : skills.length > 0 ? (
+          skills.map(skill => (
+            <Card key={skill.id}>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-start">
+                  <span>{skill.name}</span>
+                  <span className="text-sm px-2 py-1 bg-secondary rounded-full">
+                    {skill.category}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-muted-foreground">Proficiency</span>
+                  <span className="text-sm font-medium">{skill.level}%</span>
+                </div>
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary"
+                    style={{ width: `${skill.level}%` }}
+                  ></div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => openEditDialog(skill)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button variant="destructive" size="sm" onClick={() => handleDeleteSkill(skill.id)}>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+              </CardFooter>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-2 text-center py-12">
+            <p className="text-muted-foreground">No skills found. Add your first skill!</p>
           </div>
-        </TabsContent>
-
-        {Array.from(new Set(skills.map(skill => skill.category))).map(category => (
-          <TabsContent key={category} value={category}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {skills
-                .filter(skill => skill.category === category)
-                .map(skill => (
-                  <Card key={skill.id}>
-                    <CardHeader>
-                      <CardTitle>{skill.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-muted-foreground">Proficiency</span>
-                        <span className="text-sm font-medium">{skill.level}%</span>
-                      </div>
-                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary"
-                          style={{ width: `${skill.level}%` }}
-                        ></div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(skill)}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeleteSkill(skill.id)}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+        )}
+      </div>
 
       {/* Add Skill Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
