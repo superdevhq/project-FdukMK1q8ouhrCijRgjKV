@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import About from "./components/About";
 import Projects from "./components/Projects";
@@ -10,56 +10,25 @@ import { Toaster } from "./components/ui/sonner";
 import "./App.css";
 
 function App() {
-  const [activeSection, setActiveSection] = useState("about");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll("section");
-      let currentSection = "about";
-
-      sections.forEach((section) => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        if (
-          window.scrollY >= sectionTop - 200 &&
-          window.scrollY < sectionTop + sectionHeight - 200
-        ) {
-          currentSection = section.id;
-        }
-      });
-
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar activeSection={activeSection} setActiveSection={setActiveSection} />
-      
-      <main>
-        <section id="about">
-          <About />
-        </section>
+    <Router>
+      <div className="min-h-screen bg-background text-foreground">
+        <Navbar />
         
-        <section id="projects">
-          <Projects />
-        </section>
+        <main className="container mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<Navigate to="/about" replace />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
         
-        <section id="blog">
-          <Blog />
-        </section>
-        
-        <section id="contact">
-          <Contact />
-        </section>
-      </main>
-      
-      <Footer />
-      <Toaster />
-    </div>
+        <Footer />
+        <Toaster />
+      </div>
+    </Router>
   );
 }
 

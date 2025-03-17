@@ -1,23 +1,20 @@
 
 import { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
-interface NavbarProps {
-  activeSection: string;
-  setActiveSection: (section: string) => void;
-}
-
-const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
+const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
-    { id: "about", label: "About" },
-    { id: "projects", label: "Projects" },
-    { id: "blog", label: "Blog" },
-    { id: "contact", label: "Contact" },
+    { path: "/about", label: "About" },
+    { path: "/projects", label: "Projects" },
+    { path: "/blog", label: "Blog" },
+    { path: "/contact", label: "Contact" },
   ];
 
   useEffect(() => {
@@ -29,20 +26,10 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavClick = (sectionId: string) => {
-    setActiveSection(sectionId);
-    
-    // Add smooth scrolling to the section
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
-    
-    // Close mobile menu if open
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  };
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <header
@@ -56,41 +43,42 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
         <div className="flex items-center justify-between h-16">
           {/* Logo area - empty but clickable */}
           <div className="flex-shrink-0">
-            <a
-              href="#"
+            <NavLink
+              to="/about"
               className="text-xl font-bold tracking-tight"
-              onClick={(e) => {
-                e.preventDefault();
-                handleNavClick("about");
-              }}
             >
               {/* No text here as requested */}
-            </a>
+            </NavLink>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`relative px-1 py-2 text-sm font-medium transition-colors ${
-                  activeSection === item.id
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `
+                  relative px-1 py-2 text-sm font-medium transition-colors
+                  ${isActive 
+                    ? "text-primary" 
+                    : "text-muted-foreground hover:text-foreground"}
+                `}
               >
-                {item.label}
-                {activeSection === item.id && (
-                  <motion.div
-                    layoutId="activeSection"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
+                {({ isActive }) => (
+                  <>
+                    {item.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeSection"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
+                  </>
                 )}
-              </button>
+              </NavLink>
             ))}
             <ThemeToggle />
           </nav>
@@ -123,17 +111,18 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
           <div className="container mx-auto px-4 py-2">
             <nav className="flex flex-col space-y-2">
               {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
-                    activeSection === item.id
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) => `
+                    px-3 py-2 rounded-md text-sm font-medium
+                    ${isActive 
+                      ? "bg-primary/10 text-primary" 
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"}
+                  `}
                 >
                   {item.label}
-                </button>
+                </NavLink>
               ))}
             </nav>
           </div>
