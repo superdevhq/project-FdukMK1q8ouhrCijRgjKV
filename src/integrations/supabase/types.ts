@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -10,69 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      skills: {
-        Row: {
-          id: number
-          name: string
-          level: number
-          category: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: number
-          name: string
-          level: number
-          category: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: number
-          name?: string
-          level?: number
-          category?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
       blog_posts: {
         Row: {
-          id: number
-          title: string
-          excerpt: string
-          content: string | null
-          date: string
-          read_time: string
           category: string
+          content: string | null
+          created_at: string | null
+          date: string
+          excerpt: string
+          id: number
           image: string
-          created_at: string
-          updated_at: string
+          read_time: string
+          title: string
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          title: string
-          excerpt: string
-          content?: string | null
-          date: string
-          read_time: string
           category: string
+          content?: string | null
+          created_at?: string | null
+          date: string
+          excerpt: string
+          id?: number
           image: string
-          created_at?: string
-          updated_at?: string
+          read_time: string
+          title: string
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          title?: string
-          excerpt?: string
-          content?: string | null
-          date?: string
-          read_time?: string
           category?: string
+          content?: string | null
+          created_at?: string | null
+          date?: string
+          excerpt?: string
+          id?: number
           image?: string
-          created_at?: string
-          updated_at?: string
+          read_time?: string
+          title?: string
+          updated_at?: string | null
         }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: number
+          level: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: number
+          level: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: number
+          level?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -170,4 +171,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
