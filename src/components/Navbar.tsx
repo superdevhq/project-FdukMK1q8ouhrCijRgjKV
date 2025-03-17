@@ -29,6 +29,21 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavClick = (sectionId: string) => {
+    setActiveSection(sectionId);
+    
+    // Add smooth scrolling to the section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+    
+    // Close mobile menu if open
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -39,17 +54,17 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo area - removed name/portfolio text */}
+          {/* Logo area - empty but clickable */}
           <div className="flex-shrink-0">
             <a
               href="#"
               className="text-xl font-bold tracking-tight"
               onClick={(e) => {
                 e.preventDefault();
-                setActiveSection("about");
+                handleNavClick("about");
               }}
             >
-              {/* Removed "Portfolio" text */}
+              {/* No text here as requested */}
             </a>
           </div>
 
@@ -58,7 +73,7 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 className={`relative px-1 py-2 text-sm font-medium transition-colors ${
                   activeSection === item.id
                     ? "text-primary"
@@ -110,10 +125,7 @@ const Navbar = ({ activeSection, setActiveSection }: NavbarProps) => {
               {navItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => {
-                    setActiveSection(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleNavClick(item.id)}
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
                     activeSection === item.id
                       ? "bg-primary/10 text-primary"
