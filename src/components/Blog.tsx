@@ -5,19 +5,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ChevronRight } from "lucide-react";
-
-type BlogPost = {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-  readTime: string;
-  category: string;
-  image: string;
-};
+import BlogPostModal from "./BlogPostModal";
+import { BlogPost } from "@/types/blog";
 
 const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const blogPosts: BlogPost[] = [
     {
@@ -63,6 +57,17 @@ const Blog = () => {
   const filteredPosts = selectedCategory 
     ? blogPosts.filter(post => post.category === selectedCategory)
     : blogPosts;
+
+  const handleReadMore = (post: BlogPost) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Optional: Add a small delay before clearing the selected post
+    setTimeout(() => setSelectedPost(null), 300);
+  };
 
   return (
     <section className="space-y-8 py-8">
@@ -128,7 +133,12 @@ const Blog = () => {
                   <Clock className="mr-1 h-4 w-4" />
                   <span>{post.readTime}</span>
                 </div>
-                <Button variant="ghost" size="sm" className="text-primary">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary"
+                  onClick={() => handleReadMore(post)}
+                >
                   Read more
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
@@ -137,6 +147,12 @@ const Blog = () => {
           </motion.div>
         ))}
       </div>
+
+      <BlogPostModal 
+        post={selectedPost} 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal} 
+      />
     </section>
   );
 };
