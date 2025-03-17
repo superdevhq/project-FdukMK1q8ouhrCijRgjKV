@@ -28,7 +28,8 @@ const Blog = () => {
             date: "May 15, 2023",
             readTime: "5 min read",
             category: "React",
-            image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?q=80&w=2070&auto=format&fit=crop"
+            image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?q=80&w=2070&auto=format&fit=crop",
+            content: "This is a sample blog post about React Hooks. In this article, we'll explore how to use useState, useEffect, and other hooks to build powerful React applications."
           },
           {
             id: 2,
@@ -37,7 +38,8 @@ const Blog = () => {
             date: "April 22, 2023",
             readTime: "8 min read",
             category: "CSS",
-            image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=2070&auto=format&fit=crop"
+            image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=2070&auto=format&fit=crop",
+            content: "CSS Grid Layout is a powerful tool for creating complex web layouts. In this article, we'll dive deep into grid templates, areas, and responsive design techniques."
           },
           {
             id: 3,
@@ -46,7 +48,8 @@ const Blog = () => {
             date: "March 10, 2023",
             readTime: "6 min read",
             category: "TypeScript",
-            image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop"
+            image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop",
+            content: "TypeScript has become an essential tool for modern web development. This article covers type definitions, interfaces, and patterns to make your TypeScript code more robust."
           },
           {
             id: 4,
@@ -55,7 +58,8 @@ const Blog = () => {
             date: "February 5, 2023",
             readTime: "7 min read",
             category: "Accessibility",
-            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2069&auto=format&fit=crop"
+            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2069&auto=format&fit=crop",
+            content: "Web accessibility is crucial for ensuring your applications can be used by everyone. Learn about ARIA attributes, keyboard navigation, and testing tools for accessibility."
           }
         ];
     
@@ -71,7 +75,19 @@ const Blog = () => {
     : blogPosts;
 
   const handleReadMore = (post: BlogPost) => {
-    setSelectedPost(post);
+    // Ensure we have the latest version of the post from localStorage
+    const savedPosts = localStorage.getItem('portfolio-blog-posts');
+    if (savedPosts) {
+      const allPosts = JSON.parse(savedPosts);
+      const updatedPost = allPosts.find((p: BlogPost) => p.id === post.id);
+      if (updatedPost) {
+        setSelectedPost(updatedPost);
+      } else {
+        setSelectedPost(post);
+      }
+    } else {
+      setSelectedPost(post);
+    }
     setIsModalOpen(true);
   };
 
@@ -80,6 +96,16 @@ const Blog = () => {
     // Optional: Add a small delay before clearing the selected post
     setTimeout(() => setSelectedPost(null), 300);
   };
+
+  // Refresh blog posts when modal is closed to ensure we have the latest data
+  useEffect(() => {
+    if (!isModalOpen) {
+      const savedPosts = localStorage.getItem('portfolio-blog-posts');
+      if (savedPosts) {
+        setBlogPosts(JSON.parse(savedPosts));
+      }
+    }
+  }, [isModalOpen]);
 
   return (
     <section className="space-y-8 py-8">
