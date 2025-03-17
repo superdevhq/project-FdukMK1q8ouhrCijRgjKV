@@ -2,14 +2,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skill } from "@/types/skill";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 const About = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -24,17 +22,13 @@ const About = () => {
         .from('skills')
         .select('*')
         .order('category', { ascending: true });
-      
+
       if (error) {
         throw error;
       }
 
       if (data) {
         setSkills(data);
-        
-        // Extract unique categories
-        const uniqueCategories = Array.from(new Set(data.map(skill => skill.category)));
-        setCategories(uniqueCategories);
       }
     } catch (error) {
       console.error('Error fetching skills:', error);
@@ -91,14 +85,14 @@ const About = () => {
               <Button>Download Resume</Button>
             </div>
           </motion.div>
-          
+
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <h3 className="text-2xl font-bold mb-4">My Skills</h3>
-            
+
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -108,45 +102,36 @@ const About = () => {
                   </div>
                 ))}
               </div>
-            ) : categories.length > 0 ? (
-              <Tabs defaultValue={categories[0]} className="w-full">
-                <TabsList className="mb-4">
-                  {categories.map(category => (
-                    <TabsTrigger key={category} value={category}>
-                      {category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                
-                {categories.map(category => (
-                  <TabsContent key={category} value={category} className="space-y-4">
-                    {skills
-                      .filter(skill => skill.category === category)
-                      .map((skill, index) => (
-                        <motion.div 
-                          key={skill.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className="space-y-2"
-                        >
-                          <div className="flex justify-between">
-                            <span className="font-medium">{skill.name}</span>
-                            <span className="text-sm text-muted-foreground">{skill.level}%</span>
-                          </div>
-                          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                            <motion.div 
-                              className="h-full bg-primary"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${skill.level}%` }}
-                              transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                            ></motion.div>
-                          </div>
-                        </motion.div>
-                      ))}
-                  </TabsContent>
+            ) : skills.length > 0 ? (
+              <div className="space-y-4">
+                {skills.map((skill, index) => (
+                  <motion.div 
+                    key={skill.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex justify-between">
+                      <span className="font-medium">{skill.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2 py-0.5 bg-secondary/50 rounded-full">
+                          {skill.category}
+                        </span>
+                        <span className="text-sm text-muted-foreground">{skill.level}%</span>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-primary"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${skill.level}%` }}
+                        transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                      ></motion.div>
+                    </div>
+                  </motion.div>
                 ))}
-              </Tabs>
+              </div>
             ) : (
               <p className="text-muted-foreground">No skills found.</p>
             )}
