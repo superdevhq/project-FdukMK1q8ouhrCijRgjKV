@@ -52,7 +52,7 @@ const About = () => {
           transition={{ duration: 0.5 }}
           className="mb-16"
         >
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 text-foreground">
             Hey, I'm Itay
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl">
@@ -68,7 +68,7 @@ const About = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">About Me</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">About Me</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             I'm a passionate web developer with expertise in modern frontend and backend technologies.
             I love creating beautiful, responsive, and user-friendly web applications.
@@ -81,7 +81,7 @@ const About = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h3 className="text-2xl font-bold mb-4">My Journey</h3>
+            <h3 className="text-2xl font-bold mb-4 text-foreground">My Journey</h3>
             <div className="space-y-4 text-muted-foreground">
               <p>
                 I started my journey as a web developer 5 years ago, focusing on creating 
@@ -108,7 +108,7 @@ const About = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <h3 className="text-2xl font-bold mb-4">My Skills</h3>
+            <h3 className="text-2xl font-bold mb-4 text-foreground">My Skills</h3>
 
             {loading ? (
               <div className="space-y-4">
@@ -130,15 +130,15 @@ const About = () => {
                     className="space-y-2"
                   >
                     <div className="flex justify-between">
-                      <span className="font-medium">{skill.name}</span>
+                      <span className="font-medium text-foreground">{skill.name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-0.5 bg-secondary/50 rounded-full">
+                        <span className="text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full">
                           {skill.category}
                         </span>
                         <span className="text-sm text-muted-foreground">{skill.level}%</span>
                       </div>
                     </div>
-                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div className="h-2 bg-secondary/30 dark:bg-secondary/20 rounded-full overflow-hidden">
                       <motion.div 
                         className="h-full bg-primary"
                         initial={{ width: 0 }}
@@ -159,30 +159,30 @@ const About = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="bg-card rounded-lg p-8 border"
+          className="bg-card rounded-lg p-8 border shadow-sm"
         >
-          <h3 className="text-2xl font-bold mb-4">Education & Experience</h3>
+          <h3 className="text-2xl font-bold mb-4 text-foreground">Education & Experience</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 className="text-xl font-semibold mb-4">Education</h4>
+              <h4 className="text-xl font-semibold mb-4 text-foreground">Education</h4>
               <ul className="space-y-6">
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Master's in Computer Science</span>
+                    <span className="font-medium text-foreground">Master's in Computer Science</span>
                     <span className="text-sm text-muted-foreground">2018-2020</span>
                   </div>
                   <p className="text-muted-foreground">University of Technology</p>
                 </li>
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Bachelor's in Software Engineering</span>
+                    <span className="font-medium text-foreground">Bachelor's in Software Engineering</span>
                     <span className="text-sm text-muted-foreground">2014-2018</span>
                   </div>
                   <p className="text-muted-foreground">State University</p>
                 </li>
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Web Development Bootcamp</span>
+                    <span className="font-medium text-foreground">Web Development Bootcamp</span>
                     <span className="text-sm text-muted-foreground">2013</span>
                   </div>
                   <p className="text-muted-foreground">Code Academy</p>
@@ -190,25 +190,25 @@ const About = () => {
               </ul>
             </div>
             <div>
-              <h4 className="text-xl font-semibold mb-4">Experience</h4>
+              <h4 className="text-xl font-semibold mb-4 text-foreground">Experience</h4>
               <ul className="space-y-6">
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Senior Frontend Developer</span>
+                    <span className="font-medium text-foreground">Senior Frontend Developer</span>
                     <span className="text-sm text-muted-foreground">2021-Present</span>
                   </div>
                   <p className="text-muted-foreground">Tech Innovations Inc.</p>
                 </li>
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Full Stack Developer</span>
+                    <span className="font-medium text-foreground">Full Stack Developer</span>
                     <span className="text-sm text-muted-foreground">2018-2021</span>
                   </div>
                   <p className="text-muted-foreground">Digital Solutions Ltd.</p>
                 </li>
                 <li>
                   <div className="flex justify-between mb-1">
-                    <span className="font-medium">Junior Web Developer</span>
+                    <span className="font-medium text-foreground">Junior Web Developer</span>
                     <span className="text-sm text-muted-foreground">2016-2018</span>
                   </div>
                   <p className="text-muted-foreground">Creative Web Agency</p>
