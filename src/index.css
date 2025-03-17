@@ -46,41 +46,42 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    /* Updated dark theme to be slightly less dark */
+    --background: 240 10% 10%; /* Lightened from 3.9% to 10% */
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 240 10% 12%; /* Lightened from 3.9% to 12% */
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 12%; /* Lightened from 3.9% to 12% */
     --popover-foreground: 0 0% 98%;
 
     --primary: 176 80% 36%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 240 3.7% 20%; /* Lightened from 15.9% to 20% */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 240 3.7% 20%; /* Lightened from 15.9% to 20% */
+    --muted-foreground: 240 5% 70%; /* Lightened from 64.9% to 70% */
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 240 3.7% 20%; /* Lightened from 15.9% to 20% */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 3.7% 25%; /* Lightened from 15.9% to 25% */
+    --input: 240 3.7% 25%; /* Lightened from 15.9% to 25% */
     --ring: 176 80% 36%;
 
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 240 5.9% 15%; /* Lightened from 10% to 15% */
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 176 80% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 240 3.7% 25%; /* Lightened from 15.9% to 25% */
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-border: 240 3.7% 25%; /* Lightened from 15.9% to 25% */
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -93,46 +94,46 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
-  
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 10px;
   }
-  
+
   ::-webkit-scrollbar-track {
     @apply bg-secondary/50;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     @apply bg-primary/50 rounded-full;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-primary/70;
   }
-  
+
   /* Page transitions */
   .page-transition-enter {
     opacity: 0;
     transform: translateY(20px);
   }
-  
+
   .page-transition-enter-active {
     opacity: 1;
     transform: translateY(0);
     transition: opacity 300ms, transform 300ms;
   }
-  
+
   .page-transition-exit {
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   .page-transition-exit-active {
     opacity: 0;
     transform: translateY(-20px);
