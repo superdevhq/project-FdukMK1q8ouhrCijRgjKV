@@ -37,8 +37,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Remove the green header here */}
-      
       <Navbar activeSection={activeSection} setActiveSection={setActiveSection} />
       
       <main>
